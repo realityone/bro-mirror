@@ -18,22 +18,32 @@ import (
 	"golang.org/x/net/http2"
 )
 
-type Upstream interface {
+const (
+	APISubdomainPrefix = "api."
+)
+
+type Mirror interface {
 	GetClient() (*http.Client, string)
 	Remote() string
+	ServerName() string
+	ServeHTTP(http.ResponseWriter, *http.Request)
 }
 
-type Mirror struct {
-	client  *http.Client
-	baseURL url.URL
-	logger  log.Logger
+type mirror struct {
+	serverName string
+	client     *http.Client
+	baseURL    url.URL
+	logger     log.Logger
 }
 
-func (m *Mirror) GetClient() (*http.Client, string) {
+func (m *mirror) GetClient() (*http.Client, string) {
 	return m.client, m.baseURL.String()
 }
-func (m *Mirror) Remote() string {
-	return strings.TrimPrefix(m.baseURL.Host, "api.")
+func (m *mirror) Remote() string {
+	return strings.TrimPrefix(m.baseURL.Host, APISubdomainPrefix)
+}
+func (m *mirror) ServerName() string {
+	return m.serverName
 }
 
 func makeH2Transport(cfg *conf.Mirror) *http2.Transport {
@@ -67,7 +77,7 @@ func makeTransport(cfg *conf.Mirror) *http.Transport {
 	return transport
 }
 
-func NewMirror(cfg *conf.Mirror, logger log.Logger) (*Mirror, error) {
+func NewMirror(cfg *conf.Mirror, logger log.Logger) (Mirror, error) {
 	client := &http.Client{
 		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse
@@ -84,26 +94,27 @@ func NewMirror(cfg *conf.Mirror, logger log.Logger) (*Mirror, error) {
 
 	baseURL := &url.URL{
 		Scheme: "https",
-		Host:   cfg.Server,
+		Host:   cfg.Upstream,
 	}
 	if cfg.WithoutTls {
 		baseURL.Scheme = "http"
 	}
-	m := &Mirror{
-		baseURL: *baseURL,
-		client:  client,
-		logger:  logger,
+	m := &mirror{
+		serverName: cfg.ServerName,
+		baseURL:    *baseURL,
+		client:     client,
+		logger:     logger,
 	}
 	return m, nil
 }
 
-func (m *Mirror) urlFor(path string) string {
+func (m *mirror) urlFor(path string) string {
 	builder := m.baseURL
 	builder.Path = path
 	return builder.String()
 }
 
-func (m *Mirror) handler(inReq *http.Request) (*http.Response, []byte, error) {
+func (m *mirror) handler(inReq *http.Request) (*http.Response, []byte, error) {
 	req, err := http.NewRequestWithContext(inReq.Context(), inReq.Method, m.urlFor(inReq.URL.EscapedPath()), nil)
 	if err != nil {
 		return nil, nil, errors.WithStack(err)
@@ -136,7 +147,7 @@ func (m *Mirror) handler(inReq *http.Request) (*http.Response, []byte, error) {
 	return out, body, nil
 }
 
-func (m *Mirror) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+func (m *mirror) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	resp, body, err := m.handler(req)
 	if err != nil {
 		log.NewHelper(m.logger).Errorf("failed to handling request: %q: %+v", req.URL.String(), err)

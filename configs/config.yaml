@@ -3,6 +3,6 @@ server:
     addr: 0.0.0.0:8000
     timeout: 30s
 mirror:
-  server: api.buf.build
-  port: 443
+  server_name: bapis.net
+  upstream: api.buf.build
   h2: true

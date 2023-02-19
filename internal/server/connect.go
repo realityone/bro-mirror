@@ -20,9 +20,10 @@ import (
 )
 
 func NewConnectHandler(c *conf.Server,
-	mirror *service.Mirror,
+	mirror service.Mirror,
 	resolve *service.ResolveService,
 	repository *service.RepositoryService,
+	repositoryCommit *service.RepositoryCommitService,
 	logger log.Logger) (stdhttp.Handler, error) {
 	opts := []http.ServerOption{
 		http.Middleware(
@@ -58,6 +59,7 @@ func NewConnectHandler(c *conf.Server,
 
 	srv.HandlePrefix(registryv1alpha1connect.NewResolveServiceHandler(resolve, interceptors))
 	srv.HandlePrefix(registryv1alpha1connect.NewRepositoryServiceHandler(repository, interceptors))
+	srv.HandlePrefix(registryv1alpha1connect.NewRepositoryCommitServiceHandler(repositoryCommit, interceptors))
 	srv.HandlePrefix("/buf", mirror)
 
 	return srv.Handler, nil

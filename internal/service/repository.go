@@ -9,15 +9,15 @@ import (
 )
 
 type RepositoryService struct {
-	Upstream
+	Mirror
 
 	upstreamClient registryv1alpha1connect.RepositoryServiceClient
 	registryv1alpha1connect.UnimplementedRepositoryServiceHandler
 }
 
-func NewRepositoryService(m *Mirror) *RepositoryService {
+func NewRepositoryService(m Mirror) *RepositoryService {
 	return &RepositoryService{
-		Upstream:       m,
+		Mirror:         m,
 		upstreamClient: registryv1alpha1connect.NewRepositoryServiceClient(m.GetClient()),
 	}
 }

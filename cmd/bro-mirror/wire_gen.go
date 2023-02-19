@@ -28,7 +28,8 @@ func wireApp(confServer *conf.Server, data *conf.Data, mirror *conf.Mirror, logg
 	}
 	resolveService := service.NewResolveService(serviceMirror)
 	repositoryService := service.NewRepositoryService(serviceMirror)
-	handler, err := server.NewConnectHandler(confServer, serviceMirror, resolveService, repositoryService, logger)
+	repositoryCommitService := service.NewRepositoryCommitService(serviceMirror)
+	handler, err := server.NewConnectHandler(confServer, serviceMirror, resolveService, repositoryService, repositoryCommitService, logger)
 	if err != nil {
 		return nil, nil, err
 	}
