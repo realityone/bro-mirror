@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/bufbuild/buf/private/bufpkg/bufmodule/bufmoduleref"
+	registryv1alpha1 "github.com/bufbuild/buf/private/gen/proto/go/buf/alpha/registry/v1alpha1"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/pkg/errors"
 	"github.com/realityone/bro-mirror/internal/conf"
@@ -34,6 +35,8 @@ type Mirror interface {
 
 type ObjectStorage interface {
 	HasModuleSnapshot(ctx context.Context, ref bufmoduleref.ModuleReference) (bool, error)
+	CreateModuleSnapshot(context.Context, bufmoduleref.ModuleReference, *registryv1alpha1.DownloadResponse) error
+	FetchModuleSnapshot(context.Context, bufmoduleref.ModuleReference) (*registryv1alpha1.DownloadResponse, error)
 }
 
 type mirror struct {

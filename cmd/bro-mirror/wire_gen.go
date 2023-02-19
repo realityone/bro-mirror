@@ -35,7 +35,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, mirror *conf.Mirror, 
 	resolveService := service.NewResolveService(serviceMirror)
 	repositoryService := service.NewRepositoryService(serviceMirror)
 	repositoryCommitService := service.NewRepositoryCommitService(serviceMirror)
-	downloadService := service.NewDownloadService(serviceMirror)
+	downloadService := service.NewDownloadService(serviceMirror, logger)
 	handler, err := server.NewConnectHandler(confServer, serviceMirror, resolveService, repositoryService, repositoryCommitService, downloadService, logger)
 	if err != nil {
 		cleanup()
