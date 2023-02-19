@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"io/ioutil"
+	"io"
 	"net"
 	"net/http"
 	"net/url"
@@ -111,17 +111,17 @@ func (m *Mirror) handler(inReq *http.Request) (*http.Response, []byte, error) {
 	for key, vals := range inReq.Header {
 		req.Header[key] = slices.Clone(vals)
 	}
-	reqBody, err := ioutil.ReadAll(inReq.Body)
+	reqBody, err := io.ReadAll(inReq.Body)
 	if err != nil {
 		return nil, nil, errors.WithStack(err)
 	}
-	req.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
+	req.Body = io.NopCloser(bytes.NewBuffer(reqBody))
 
 	resp, err := m.client.Do(req)
 	if err != nil {
 		return nil, nil, errors.WithStack(err)
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, nil, errors.WithStack(err)
 	}
@@ -132,7 +132,7 @@ func (m *Mirror) handler(inReq *http.Request) (*http.Response, []byte, error) {
 		out.Header[key] = slices.Clone(vals)
 	}
 	out.StatusCode = resp.StatusCode
-	out.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+	out.Body = io.NopCloser(bytes.NewBuffer(body))
 	return out, body, nil
 }
 
