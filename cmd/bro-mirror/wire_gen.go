@@ -10,6 +10,7 @@ import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/realityone/bro-mirror/internal/conf"
+	"github.com/realityone/bro-mirror/internal/data"
 	"github.com/realityone/bro-mirror/internal/server"
 	"github.com/realityone/bro-mirror/internal/service"
 )
@@ -21,23 +22,32 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, data *conf.Data, mirror *conf.Mirror, logger log.Logger) (*kratos.App, func(), error) {
-	serviceMirror, err := service.NewMirror(mirror, logger)
+func wireApp(confServer *conf.Server, confData *conf.Data, mirror *conf.Mirror, data_TencentOSS *conf.Data_TencentOSS, logger log.Logger) (*kratos.App, func(), error) {
+	objectStorage, cleanup, err := data.NewObjectStorage(data_TencentOSS, logger)
 	if err != nil {
+		return nil, nil, err
+	}
+	serviceMirror, err := service.NewMirror(mirror, objectStorage, logger)
+	if err != nil {
+		cleanup()
 		return nil, nil, err
 	}
 	resolveService := service.NewResolveService(serviceMirror)
 	repositoryService := service.NewRepositoryService(serviceMirror)
 	repositoryCommitService := service.NewRepositoryCommitService(serviceMirror)
-	handler, err := server.NewConnectHandler(confServer, serviceMirror, resolveService, repositoryService, repositoryCommitService, logger)
+	downloadService := service.NewDownloadService(serviceMirror)
+	handler, err := server.NewConnectHandler(confServer, serviceMirror, resolveService, repositoryService, repositoryCommitService, downloadService, logger)
 	if err != nil {
+		cleanup()
 		return nil, nil, err
 	}
 	connectServer, err := server.NewConnectServer(confServer, handler)
 	if err != nil {
+		cleanup()
 		return nil, nil, err
 	}
 	app := newApp(logger, connectServer)
 	return app, func() {
+		cleanup()
 	}, nil
 }

@@ -1,0 +1,3 @@
+[submodule "buf"]
+	path = buf
+	url = https://github.com/bufbuild/buf.git

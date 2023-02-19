@@ -11,9 +11,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bufbuild/buf/private/bufpkg/bufmodule/bufmoduleref"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/pkg/errors"
 	"github.com/realityone/bro-mirror/internal/conf"
+	"github.com/realityone/bro-mirror/internal/data"
 	"golang.org/x/exp/slices"
 	"golang.org/x/net/http2"
 )
@@ -27,13 +29,19 @@ type Mirror interface {
 	Remote() string
 	ServerName() string
 	ServeHTTP(http.ResponseWriter, *http.Request)
+	ObjectStorage() ObjectStorage
+}
+
+type ObjectStorage interface {
+	HasModuleSnapshot(ctx context.Context, ref bufmoduleref.ModuleReference) (bool, error)
 }
 
 type mirror struct {
-	serverName string
-	client     *http.Client
-	baseURL    url.URL
-	logger     log.Logger
+	serverName    string
+	client        *http.Client
+	baseURL       url.URL
+	logger        log.Logger
+	objectStorage ObjectStorage
 }
 
 func (m *mirror) GetClient() (*http.Client, string) {
@@ -44,6 +52,9 @@ func (m *mirror) Remote() string {
 }
 func (m *mirror) ServerName() string {
 	return m.serverName
+}
+func (m *mirror) ObjectStorage() ObjectStorage {
+	return m.objectStorage
 }
 
 func makeH2Transport(cfg *conf.Mirror) *http2.Transport {
@@ -77,7 +88,7 @@ func makeTransport(cfg *conf.Mirror) *http.Transport {
 	return transport
 }
 
-func NewMirror(cfg *conf.Mirror, logger log.Logger) (Mirror, error) {
+func NewMirror(cfg *conf.Mirror, objectStorage *data.ObjectStorage, logger log.Logger) (Mirror, error) {
 	client := &http.Client{
 		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
 			return http.ErrUseLastResponse
@@ -100,10 +111,11 @@ func NewMirror(cfg *conf.Mirror, logger log.Logger) (Mirror, error) {
 		baseURL.Scheme = "http"
 	}
 	m := &mirror{
-		serverName: cfg.ServerName,
-		baseURL:    *baseURL,
-		client:     client,
-		logger:     logger,
+		serverName:    cfg.ServerName,
+		baseURL:       *baseURL,
+		client:        client,
+		logger:        logger,
+		objectStorage: objectStorage,
 	}
 	return m, nil
 }

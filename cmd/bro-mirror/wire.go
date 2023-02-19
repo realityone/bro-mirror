@@ -7,6 +7,7 @@ package main
 
 import (
 	"github.com/realityone/bro-mirror/internal/conf"
+	"github.com/realityone/bro-mirror/internal/data"
 	"github.com/realityone/bro-mirror/internal/server"
 	"github.com/realityone/bro-mirror/internal/service"
 
@@ -16,6 +17,6 @@ import (
 )
 
 // wireApp init kratos application.
-func wireApp(*conf.Server, *conf.Data, *conf.Mirror, log.Logger) (*kratos.App, func(), error) {
-	panic(wire.Build(server.ProviderSet, service.ProviderSet, newApp))
+func wireApp(*conf.Server, *conf.Data, *conf.Mirror, *conf.Data_TencentOSS, log.Logger) (*kratos.App, func(), error) {
+	panic(wire.Build(data.ProviderSet, server.ProviderSet, service.ProviderSet, newApp))
 }

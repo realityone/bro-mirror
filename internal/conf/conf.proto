@@ -23,7 +23,15 @@ message Server {
     }
     Connect connect = 1;
 }
-message Data {}
+message Data {
+    message TencentOSS {
+        string bucket_url = 1;
+        string secret_id = 2;
+        string secret_key = 3;
+        google.protobuf.Duration timeout = 4;
+    }
+    TencentOSS tencent_oss = 1;
+}
 message Mirror {
     string server_name = 1;
     string upstream = 2;

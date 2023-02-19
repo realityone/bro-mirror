@@ -7,7 +7,7 @@ import (
 	stdhttp "net/http"
 	"time"
 
-	"buf.build/gen/go/bufbuild/buf/bufbuild/connect-go/buf/alpha/registry/v1alpha1/registryv1alpha1connect"
+	"github.com/bufbuild/buf/private/gen/proto/connect/buf/alpha/registry/v1alpha1/registryv1alpha1connect"
 	"github.com/bufbuild/connect-go"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
@@ -24,6 +24,7 @@ func NewConnectHandler(c *conf.Server,
 	resolve *service.ResolveService,
 	repository *service.RepositoryService,
 	repositoryCommit *service.RepositoryCommitService,
+	download *service.DownloadService,
 	logger log.Logger) (stdhttp.Handler, error) {
 	opts := []http.ServerOption{
 		http.Middleware(
@@ -60,6 +61,7 @@ func NewConnectHandler(c *conf.Server,
 	srv.HandlePrefix(registryv1alpha1connect.NewResolveServiceHandler(resolve, interceptors))
 	srv.HandlePrefix(registryv1alpha1connect.NewRepositoryServiceHandler(repository, interceptors))
 	srv.HandlePrefix(registryv1alpha1connect.NewRepositoryCommitServiceHandler(repositoryCommit, interceptors))
+	srv.HandlePrefix(registryv1alpha1connect.NewDownloadServiceHandler(download, interceptors))
 	srv.HandlePrefix("/buf", mirror)
 
 	return srv.Handler, nil
