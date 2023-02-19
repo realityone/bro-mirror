@@ -7,6 +7,7 @@ import (
 	stdhttp "net/http"
 	"time"
 
+	"buf.build/gen/go/bufbuild/buf/bufbuild/connect-go/buf/alpha/registry/v1alpha1/registryv1alpha1connect"
 	"github.com/bufbuild/connect-go"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/logging"
@@ -20,6 +21,8 @@ import (
 
 func NewConnectHandler(c *conf.Server,
 	mirror *service.Mirror,
+	resolve *service.ResolveService,
+	repository *service.RepositoryService,
 	logger log.Logger) (stdhttp.Handler, error) {
 	opts := []http.ServerOption{
 		http.Middleware(
@@ -47,33 +50,15 @@ func NewConnectHandler(c *conf.Server,
 		config := &tls.Config{Certificates: []tls.Certificate{cert}}
 		opts = append(opts, http.TLSConfig(config))
 	}
-	// interceptors := connect.WithInterceptors(
-	// 	NewLoggingInterceptor(logger),
-	// )
+	interceptors := connect.WithInterceptors(
+		NewLoggingInterceptor(logger),
+	)
 
 	srv := http.NewServer(opts...)
 
+	srv.HandlePrefix(registryv1alpha1connect.NewResolveServiceHandler(resolve, interceptors))
+	srv.HandlePrefix(registryv1alpha1connect.NewRepositoryServiceHandler(repository, interceptors))
 	srv.HandlePrefix("/buf", mirror)
-
-	// srv.HandlePrefix(healthv1.NewHealthHandler(health, interceptors))
-
-	// srv.HandlePrefix(connectstub.NewAuthnServiceHandler(authn, interceptors))
-	// srv.HandlePrefix(connectstub.NewDownloadServiceHandler(download, interceptors))
-	// srv.HandlePrefix(connectstub.NewGenerateServiceHandler(generate, interceptors))
-	// srv.HandlePrefix(connectstub.NewOrganizationServiceHandler(organization, interceptors))
-	// srv.HandlePrefix(connectstub.NewPluginServiceHandler(plugin, interceptors))
-	// srv.HandlePrefix(connectstub.NewPushServiceHandler(push, interceptors))
-	// srv.HandlePrefix(connectstub.NewRepositoryCommitServiceHandler(repositorycommit, interceptors))
-	// srv.HandlePrefix(connectstub.NewRepositoryServiceHandler(repository, interceptors))
-	// srv.HandlePrefix(connectstub.NewRepositoryTagServiceHandler(repositorytag, interceptors))
-	// srv.HandlePrefix(connectstub.NewResolveServiceHandler(resolve, interceptors))
-	// srv.HandlePrefix(connectstub.NewTokenServiceHandler(token, interceptors))
-	// srv.HandlePrefix(connectstub.NewUserServiceHandler(user, interceptors))
-	// srv.HandlePrefix(managementv1.NewManagementHandler(management, interceptors))
-	// srv.HandlePrefix(managementv1.NewGoRemoteGenerateHandler(goremotegen, interceptors))
-
-	// goremotegen.AsHTTPService().SetupRoutes(srv)
-	// goremotegenv2.AsHTTPService().SetupRoutes(srv)
 
 	return srv.Handler, nil
 }
@@ -129,7 +114,6 @@ func (s *ConnectServer) Stop(ctx context.Context) error {
 }
 
 func NewLoggingInterceptor(logger log.Logger) connect.UnaryInterceptorFunc {
-	helper := log.NewHelper(logger)
 	interceptor := func(next connect.UnaryFunc) connect.UnaryFunc {
 		return connect.UnaryFunc(func(
 			ctx context.Context,
@@ -138,10 +122,10 @@ func NewLoggingInterceptor(logger log.Logger) connect.UnaryInterceptorFunc {
 			name := req.Spec().Procedure
 			res, err := next(ctx, req)
 			if err != nil {
-				helper.Errorf("Failed to execute %s: %+v err: %+v", name, req.Any(), err)
+				log.NewHelper(logger).Errorf("failed to execute %s: %+v err: %+v", name, req.Any(), err)
 				return nil, err
 			}
-			helper.Infof("Succeeded to execute %s: %+v res: %v", name, req.Any(), res.Any())
+			log.NewHelper(logger).Infof("succeeded to execute %s: %+v res: %v", name, req.Any(), res.Any())
 			return res, nil
 		})
 	}

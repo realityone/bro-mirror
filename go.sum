@@ -1,3 +1,7 @@
+buf.build/gen/go/bufbuild/buf/bufbuild/connect-go v1.5.2-20230208164235-183ee066f0d0.1 h1:Ykux+WcmwGVIWIOiOHJbDMq2fascvZauPvKqQ9C+ah0=
+buf.build/gen/go/bufbuild/buf/bufbuild/connect-go v1.5.2-20230208164235-183ee066f0d0.1/go.mod h1:XgnHMuzyHQhRmBSFetcMtYX9w0xjJdNw5e7c8XtQVcQ=
+buf.build/gen/go/bufbuild/buf/protocolbuffers/go v1.28.1-20230208164235-183ee066f0d0.4 h1:3OedqKugi75nLLnVyI6o/DJoh76uhWSLiDw8dB2/UEw=
+buf.build/gen/go/bufbuild/buf/protocolbuffers/go v1.28.1-20230208164235-183ee066f0d0.4/go.mod h1:ggApdy0oOC/JdqOeUTeRD5x0gx9eZmdn+4T1yd6B8Co=
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
@@ -199,6 +203,7 @@ google.golang.org/protobuf v1.26.0-rc.1/go.mod h1:jlhhOSvTdKEhbULTjvd4ARK9grFBp0
 google.golang.org/protobuf v1.26.0/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.27.1/go.mod h1:9q0QmTI4eRPtz6boOQmLYwt+qCgq0jsYwAQnmE0givc=
 google.golang.org/protobuf v1.28.0/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
+google.golang.org/protobuf v1.28.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8 h1:KR8+MyP7/qOlV+8Af01LtjL04bu7on42eVsxT4EyBQk=
 google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

@@ -3,6 +3,8 @@ module github.com/realityone/bro-mirror
 go 1.19
 
 require (
+	buf.build/gen/go/bufbuild/buf/bufbuild/connect-go v1.5.2-20230208164235-183ee066f0d0.1
+	buf.build/gen/go/bufbuild/buf/protocolbuffers/go v1.28.1-20230208164235-183ee066f0d0.4
 	github.com/bufbuild/connect-go v1.5.2
 	github.com/go-kratos/kratos/v2 v2.4.1
 	github.com/google/wire v0.5.0

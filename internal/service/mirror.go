@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -17,10 +18,22 @@ import (
 	"golang.org/x/net/http2"
 )
 
+type Upstream interface {
+	GetClient() (*http.Client, string)
+	Remote() string
+}
+
 type Mirror struct {
 	client  *http.Client
 	baseURL url.URL
 	logger  log.Logger
+}
+
+func (m *Mirror) GetClient() (*http.Client, string) {
+	return m.client, m.baseURL.String()
+}
+func (m *Mirror) Remote() string {
+	return strings.TrimPrefix(m.baseURL.Host, "api.")
 }
 
 func makeH2Transport(cfg *conf.Mirror) *http2.Transport {
@@ -130,7 +143,13 @@ func (m *Mirror) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.NewHelper(m.logger).Infof("handling incoming request: %q, status-code: %d, body-size: %d", req.URL.String(), resp.StatusCode, len(body))
+	switch {
+	case http.StatusOK <= resp.StatusCode && resp.StatusCode < http.StatusMultipleChoices:
+		log.NewHelper(m.logger).Infof("handling incoming request: %q, status-code: %d, body-size: %d", req.URL.String(), resp.StatusCode, len(body))
+	default:
+		log.NewHelper(m.logger).Warnf("handling incoming request with failed status code: %q, status-code: %d, body: %s", req.URL.String(), resp.StatusCode, string(body))
+	}
+
 	for key, vals := range resp.Header {
 		w.Header()[key] = slices.Clone(vals)
 	}
