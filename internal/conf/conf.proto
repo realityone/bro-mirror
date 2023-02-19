@@ -1,5 +1,6 @@
 syntax = "proto3";
-package kratos.api;
+
+package bro.mirror.config;
 
 option go_package = "github.com/realityone/bro-mirror/internal/conf;conf";
 
@@ -8,6 +9,7 @@ import "google/protobuf/duration.proto";
 message Bootstrap {
     Server server = 1;
     Data data = 2;
+    Mirror mirror = 3;
 }
 
 message Server {
@@ -22,3 +24,10 @@ message Server {
     Connect connect = 1;
 }
 message Data {}
+message Mirror {
+    string server = 1;
+    bool h2 = 2;
+    bool insecure = 3;
+    bool without_tls = 4;
+    google.protobuf.Duration timeout = 5;
+}

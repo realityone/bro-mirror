@@ -11,6 +11,7 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/realityone/bro-mirror/internal/conf"
 	"github.com/realityone/bro-mirror/internal/server"
+	"github.com/realityone/bro-mirror/internal/service"
 )
 
 import (
@@ -20,8 +21,12 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	handler, err := server.NewConnectHandler(confServer, logger)
+func wireApp(confServer *conf.Server, data *conf.Data, mirror *conf.Mirror, logger log.Logger) (*kratos.App, func(), error) {
+	serviceMirror, err := service.NewMirror(mirror, logger)
+	if err != nil {
+		return nil, nil, err
+	}
+	handler, err := server.NewConnectHandler(confServer, serviceMirror, logger)
 	if err != nil {
 		return nil, nil, err
 	}

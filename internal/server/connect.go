@@ -13,11 +13,14 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/realityone/bro-mirror/internal/conf"
+	"github.com/realityone/bro-mirror/internal/service"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
 
-func NewConnectHandler(c *conf.Server, logger log.Logger) (stdhttp.Handler, error) {
+func NewConnectHandler(c *conf.Server,
+	mirror *service.Mirror,
+	logger log.Logger) (stdhttp.Handler, error) {
 	opts := []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -49,6 +52,8 @@ func NewConnectHandler(c *conf.Server, logger log.Logger) (stdhttp.Handler, erro
 	// )
 
 	srv := http.NewServer(opts...)
+
+	srv.HandlePrefix("/buf", mirror)
 
 	// srv.HandlePrefix(healthv1.NewHealthHandler(health, interceptors))
 

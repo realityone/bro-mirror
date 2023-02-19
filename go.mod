@@ -6,7 +6,9 @@ require (
 	github.com/bufbuild/connect-go v1.5.2
 	github.com/go-kratos/kratos/v2 v2.4.1
 	github.com/google/wire v0.5.0
+	github.com/pkg/errors v0.9.1
 	go.uber.org/automaxprocs v1.5.1
+	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
 	golang.org/x/net v0.5.0
 	google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8
 )
