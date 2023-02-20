@@ -1,0 +1,9 @@
+version: '3.4'
+services:
+  bro-mirror:
+    build: ./
+    restart: always
+    volumes:
+      - ./release/conf:/data/conf
+    ports:
+      - "443:443/tcp"

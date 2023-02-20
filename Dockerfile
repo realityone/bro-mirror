@@ -1,8 +1,9 @@
-FROM golang:1.16 AS builder
+FROM golang:1.19 AS builder
 
 COPY . /src
 WORKDIR /src
 
+RUN go mod tidy
 RUN make build
 
 FROM debian:stable-slim
